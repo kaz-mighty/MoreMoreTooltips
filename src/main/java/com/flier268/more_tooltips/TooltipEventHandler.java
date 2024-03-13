@@ -19,13 +19,13 @@ import net.minecraft.item.Items;
 import net.minecraft.item.ToolItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class TooltipEventHandler {
     private static DecimalFormat Formatter = new DecimalFormat("###.#");
@@ -93,7 +93,7 @@ public class TooltipEventHandler {
                 return;
             }
             Item item = itemStack.getItem();
-            Identifier itemId = Registry.ITEM.getKey(item).get().getValue();
+            Identifier itemId = Registries.ITEM.getKey(item).get().getValue();
 
             var clientInstance = MinecraftClient.getInstance();
             int threshold = clientInstance.getWindow().getScaledWidth() / 2;
@@ -171,7 +171,7 @@ public class TooltipEventHandler {
             // Tooltip - Registry Name
             if (config.ID.isShown(isShiftDown, config.debug)) {
                 String string = Text.translatable("tooltip.more_tooltips.registryName",
-                        Registry.ITEM.getId(item).toString()).getString();
+                        Registries.ITEM.getId(item).toString()).getString();
                 string = LimitStringLength(string, config.TextMaxLength);
                 list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
             }
@@ -215,7 +215,7 @@ public class TooltipEventHandler {
 
             // Tooltip - Light level
             if (config.LightLevel.isShown(isShiftDown, config.debug)) {
-                int luminance = Registry.BLOCK.get(itemId).getDefaultState().getLuminance();
+                int luminance = Registries.BLOCK.get(itemId).getDefaultState().getLuminance();
                 if (luminance > 0) {
                     String string = Text.translatable("tooltip.more_tooltips.LightLevel", luminance).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
