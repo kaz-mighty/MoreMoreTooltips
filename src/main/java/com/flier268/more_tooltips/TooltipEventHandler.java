@@ -196,9 +196,9 @@ public class TooltipEventHandler {
 
             // Tooltip - Repair Cost
             if (config.RepairCost.isShown(isShiftDown, config.debug)) {
-                if (itemStack.isDamageable()) {
-                    String string = new TranslatableText("tooltip.more_tooltips.RepairCost", itemStack.getRepairCost())
-                            .getString();
+                int repairCost = itemStack.getRepairCost();
+                if (repairCost > 0 || itemStack.isDamageable()) {
+                    String string = new TranslatableText("tooltip.more_tooltips.RepairCost", repairCost).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
                 }
@@ -236,7 +236,7 @@ public class TooltipEventHandler {
             }
 
             if (isShiftDown && config.debug) {
-                String string = new LiteralText("Powered by flier268").getString();
+                String string = new LiteralText("Debugging").getString();
                 list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, AQUA));
             }
         });
