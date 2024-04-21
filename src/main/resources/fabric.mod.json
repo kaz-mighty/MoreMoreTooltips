@@ -1,16 +1,22 @@
 {
   "schemaVersion": 1,
-  "id": "more_tooltips",
+  "id": "more_more_tooltips",
   "version": "${version}",
-
-  "name": "MoreTooltips",
+  "provides": [
+    "more_tooltips"
+  ],
+  
+  "name": "More More Tooltips",
   "description": "Providing Integrations & Tooltips ",
   "authors": [
+    "kaz_mighty"
+  ],
+  "contributors": [
     "flier268"
   ],
   "contact": {
-    "homepage": "https://github.com/flier268",
-    "sources": "https://github.com/flier268/MoreTooltips"
+    "homepage": "https://github.com/kaz-mighty",
+    "sources": "https://github.com/kaz-mighty/MoreTooltips"
   },
 
   "license": "GPL-3.0",
@@ -33,7 +39,11 @@
 
   "depends": {
     "fabricloader": ">=0.11.6",
-    "fabric": "*"
+    "fabric": "*",
+    "cloth-config": "*"
+  },
+  "recommends": {
+    "modmenu": "*"
   },
   "suggests": {
     "another-mod": "*"
