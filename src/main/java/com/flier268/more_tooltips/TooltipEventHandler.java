@@ -15,8 +15,10 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.item.ToolItem;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
@@ -232,6 +234,33 @@ public class TooltipEventHandler {
                             Formatter.format(chance * 100)).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
+                }
+            }
+            
+            // Tooltip - Bee Nest / Beehive information
+            if (config.BeeNest.isShown(isShiftDown, config.debug)) {
+                if (item == Items.BEE_NEST || item == Items.BEEHIVE) {
+                    NbtCompound nbtData1 = itemStack.getNbt();
+                    if (nbtData1 != null) {
+                        // honey level
+                        // Data type is string (when survival) or int (when creative).
+                        // Also, when pick block in creative, it doesn't exist.
+                        NbtCompound nbtData2 = nbtData1.getCompound("BlockStateTag");
+                        if (nbtData2 != null && nbtData2.contains("honey_level")) {
+                            String string = new TranslatableText("tooltip.more_tooltips.HoneyLevel", 
+                                    nbtData2.get("honey_level").asString()).getString();
+                            string = LimitStringLength(string, config.TextMaxLength);
+                            list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
+                        }
+                        // bees num
+                        NbtCompound nbtDate3 = nbtData1.getCompound("BlockEntityTag");
+                        if (nbtDate3 != null) {
+                            String string = new TranslatableText("tooltip.more_tooltips.BeeCount",
+                                    nbtDate3.getList("Bees", NbtElement.COMPOUND_TYPE).size()).getString();
+                            string = LimitStringLength(string, config.TextMaxLength);
+                            list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
+                        }
+                    }
                 }
             }
 

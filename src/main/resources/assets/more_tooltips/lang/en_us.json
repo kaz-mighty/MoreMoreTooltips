@@ -19,6 +19,7 @@
   "text.autoconfig.more_tooltips.option.MiningSpeed": "Mining Speed of tool",
   "text.autoconfig.more_tooltips.option.CompostingChance": "Composting chance",
   "text.autoconfig.more_tooltips.option.LightLevel": "Light Level",
+  "text.autoconfig.more_tooltips.option.BeeNest": "Bee Nest Tooltip",
   "text.autoconfig.more_tooltips.option.TextMaxLength": "Max text length",
 
   "_comment": "Tooltips",
@@ -34,5 +35,7 @@
   "tooltip.more_tooltips.MiningLevel": "Mining Level: %d",
   "tooltip.more_tooltips.MiningSpeed": "Mining Speed: %s",
   "tooltip.more_tooltips.CompostingChance": "Composting chance: %s%%",
-  "tooltip.more_tooltips.LightLevel": "Light Level: %d"
+  "tooltip.more_tooltips.LightLevel": "Light Level: %d",
+  "tooltip.more_tooltips.HoneyLevel": "Honey Level: %s",
+  "tooltip.more_tooltips.BeeCount": "Bee Count: %d"
 }
