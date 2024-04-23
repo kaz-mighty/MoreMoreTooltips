@@ -22,6 +22,7 @@ Show item's info when mouse hover.
 * Enchantability of tool
 * Light level
 * Composting chance
+* HoneyLevel and Bee count for Bee Nest and Beehive
 * Configable
 
 ## Screenshot
