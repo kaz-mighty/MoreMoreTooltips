@@ -19,12 +19,10 @@ import net.minecraft.item.Items;
 import net.minecraft.item.ToolItem;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -48,19 +46,19 @@ public class TooltipEventHandler {
                     String textPart = text.substring(added, lastSpaceIndex);
                     int textPartWidth = renderer.getWidth(textPart);
                     if (textPartWidth <= maxWidth || textPart.indexOf(" ") == -1) {
-                        output.add(TrySetStyle(new LiteralText(textPart), style));
+                        output.add(TrySetStyle(Text.literal(textPart), style));
                         added += textPart.length() + 1;
                         skipEnd = 0;
                     } else {
                         skipEnd = text.length() - lastSpaceIndex;
                     }
                 } else {
-                    output.add(TrySetStyle(new LiteralText(text.substring(added, text.length())), style));
+                    output.add(TrySetStyle(Text.literal(text.substring(added)), style));
                     break;
                 }
             }
         } else {
-            output.add(TrySetStyle(new LiteralText(text), style));
+            output.add(TrySetStyle(Text.literal(text), style));
         }
         return output;
     }
@@ -72,7 +70,7 @@ public class TooltipEventHandler {
             return source;
     }
 
-    private static Text TrySetStyle(BaseText text, Style style) {
+    private static Text TrySetStyle(MutableText text, Style style) {
         if (style != null)
             return text.setStyle(style);
         return text;
@@ -107,7 +105,7 @@ public class TooltipEventHandler {
             if (config.BurnTime.isShown(isShiftDown, config.debug)) {
                 Integer burnTime = FuelRegistry.INSTANCE.get(item);
                 if (burnTime != null && burnTime > 0) {
-                    String string = new TranslatableText("tooltip.more_tooltips.burnTime", burnTime).getString();
+                    String string = Text.translatable("tooltip.more_tooltips.burnTime", burnTime).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
                 }
@@ -117,7 +115,7 @@ public class TooltipEventHandler {
             if (config.MiningLevel.isShown(isShiftDown, config.debug)) {
                 if (item instanceof ToolItem) {
                     int miningLevel = ((ToolItem) item).getMaterial().getMiningLevel();
-                    String string = new TranslatableText("tooltip.more_tooltips.MiningLevel", miningLevel).getString();
+                    String string = Text.translatable("tooltip.more_tooltips.MiningLevel", miningLevel).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold));
                 }
@@ -127,7 +125,7 @@ public class TooltipEventHandler {
             if (config.MiningSpeed.isShown(isShiftDown, config.debug)) {
                 if (item instanceof ToolItem) {
                     float miningSpeed = ((ToolItem) item).getMaterial().getMiningSpeedMultiplier();
-                    String string = new TranslatableText("tooltip.more_tooltips.MiningSpeed",
+                    String string = Text.translatable("tooltip.more_tooltips.MiningSpeed",
                             Formatter.format(miningSpeed)).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold));
@@ -139,7 +137,7 @@ public class TooltipEventHandler {
                 int maxDamage = itemStack.getMaxDamage();
                 int currentDamage = maxDamage - itemStack.getDamage();
                 if (maxDamage > 0) {
-                    String string = new TranslatableText("tooltip.more_tooltips.durability", currentDamage, maxDamage)
+                    String string = Text.translatable("tooltip.more_tooltips.durability", currentDamage, maxDamage)
                             .getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold));
@@ -152,7 +150,7 @@ public class TooltipEventHandler {
                     FoodComponent foodComponent = item.getFoodComponent();
                     int healVal = foodComponent.getHunger();
                     float satVal = healVal * (foodComponent.getSaturationModifier()) * 2;
-                    String string = new TranslatableText("tooltip.more_tooltips.hunger", healVal,
+                    String string = Text.translatable("tooltip.more_tooltips.hunger", healVal,
                             Formatter.format(satVal)).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
@@ -163,7 +161,7 @@ public class TooltipEventHandler {
             if (config.NBT.isShown(isShiftDown, config.debug)) {
                 NbtCompound nbtData = itemStack.getNbt();
                 if (nbtData != null) {
-                    String string = new TranslatableText("tooltip.more_tooltips.nbtTagData", nbtData.asString())
+                    String string = Text.translatable("tooltip.more_tooltips.nbtTagData", nbtData.asString())
                             .getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
@@ -172,7 +170,7 @@ public class TooltipEventHandler {
 
             // Tooltip - Registry Name
             if (config.ID.isShown(isShiftDown, config.debug)) {
-                String string = new TranslatableText("tooltip.more_tooltips.registryName",
+                String string = Text.translatable("tooltip.more_tooltips.registryName",
                         Registry.ITEM.getId(item).toString()).getString();
                 string = LimitStringLength(string, config.TextMaxLength);
                 list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
@@ -181,7 +179,7 @@ public class TooltipEventHandler {
             // Tooltip - Max Stack Size
             if (config.MaxStackSize.isShown(isShiftDown, config.debug)) {
                 if (itemStack.isStackable()) {
-                    String string = new TranslatableText("tooltip.more_tooltips.maxStackSize", itemStack.getMaxCount())
+                    String string = Text.translatable("tooltip.more_tooltips.maxStackSize", itemStack.getMaxCount())
                             .getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
@@ -190,7 +188,7 @@ public class TooltipEventHandler {
 
             // Tooltip - Translation Key
             if (config.TranslationKey.isShown(isShiftDown, config.debug)) {
-                String string = new TranslatableText("tooltip.more_tooltips.translationKey",
+                String string = Text.translatable("tooltip.more_tooltips.translationKey",
                         itemStack.getTranslationKey()).getString();
                 string = LimitStringLength(string, config.TextMaxLength);
                 list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
@@ -200,7 +198,7 @@ public class TooltipEventHandler {
             if (config.RepairCost.isShown(isShiftDown, config.debug)) {
                 int repairCost = itemStack.getRepairCost();
                 if (repairCost > 0 || itemStack.isDamageable()) {
-                    String string = new TranslatableText("tooltip.more_tooltips.RepairCost", repairCost).getString();
+                    String string = Text.translatable("tooltip.more_tooltips.RepairCost", repairCost).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
                 }
@@ -208,7 +206,7 @@ public class TooltipEventHandler {
             // Tooltip - Enchantability
             if (config.Enchantability.isShown(isShiftDown, config.debug)) {
                 if (itemStack.isEnchantable()) {
-                    String string = new TranslatableText("tooltip.more_tooltips.Enchantability",
+                    String string = Text.translatable("tooltip.more_tooltips.Enchantability",
                             item.getEnchantability()).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
@@ -219,7 +217,7 @@ public class TooltipEventHandler {
             if (config.LightLevel.isShown(isShiftDown, config.debug)) {
                 int luminance = Registry.BLOCK.get(itemId).getDefaultState().getLuminance();
                 if (luminance > 0) {
-                    String string = new TranslatableText("tooltip.more_tooltips.LightLevel", luminance).getString();
+                    String string = Text.translatable("tooltip.more_tooltips.LightLevel", luminance).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
                 }
@@ -230,7 +228,7 @@ public class TooltipEventHandler {
                 float chance = ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.getFloat(item);
 
                 if (chance > 0.0) {
-                    String string = new TranslatableText("tooltip.more_tooltips.CompostingChance",
+                    String string = Text.translatable("tooltip.more_tooltips.CompostingChance",
                             Formatter.format(chance * 100)).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
@@ -247,7 +245,7 @@ public class TooltipEventHandler {
                         // Also, when pick block in creative, it doesn't exist.
                         NbtCompound nbtData2 = nbtData1.getCompound("BlockStateTag");
                         if (nbtData2 != null && nbtData2.contains("honey_level")) {
-                            String string = new TranslatableText("tooltip.more_tooltips.HoneyLevel", 
+                            String string = Text.translatable("tooltip.more_tooltips.HoneyLevel", 
                                     nbtData2.get("honey_level").asString()).getString();
                             string = LimitStringLength(string, config.TextMaxLength);
                             list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
@@ -255,7 +253,7 @@ public class TooltipEventHandler {
                         // bees num
                         NbtCompound nbtDate3 = nbtData1.getCompound("BlockEntityTag");
                         if (nbtDate3 != null) {
-                            String string = new TranslatableText("tooltip.more_tooltips.BeeCount",
+                            String string = Text.translatable("tooltip.more_tooltips.BeeCount",
                                     nbtDate3.getList("Bees", NbtElement.COMPOUND_TYPE).size()).getString();
                             string = LimitStringLength(string, config.TextMaxLength);
                             list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
@@ -265,7 +263,7 @@ public class TooltipEventHandler {
             }
 
             if (isShiftDown && config.debug) {
-                String string = new LiteralText("Debugging").getString();
+                String string = Text.literal("Debugging").getString();
                 list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, AQUA));
             }
         });
