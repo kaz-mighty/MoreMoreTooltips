@@ -13,10 +13,11 @@ Show item's info when mouse hover.
 * Burn Time Tooltip
 * Show item's ID
 * Durability Tooltip
-* Mining Level of tool
+* Mining Level of tool (before 1.20.4 only)
 * Hunger/Saturation Tooltip
 * Max Stack Size Tooltip
-* NBT Data Tooltip
+* NBT Data Tooltip (before 1.20.4)
+* Component Tooltip (after 1.20.5)
 * Registry Name Tooltip
 * Exp Cost when repair
 * Enchantability of tool

@@ -8,18 +8,23 @@ import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.minecraft.block.ComposterBlock;
+import net.minecraft.block.entity.BeehiveBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.item.FoodComponent;
+import net.minecraft.component.ComponentChanges;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.BlockStateComponent;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.item.ToolItem;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -75,9 +80,13 @@ public class TooltipEventHandler {
             return text.setStyle(style);
         return text;
     }
+    
+    private static NbtElement componentEncode(ComponentChanges components, RegistryWrapper.WrapperLookup registries) {
+        return ComponentChanges.CODEC.encodeStart(registries.getOps(NbtOps.INSTANCE), components).getOrThrow();
+    }
 
     public static void addMoreTooltip() {
-        ItemTooltipCallback.EVENT.register((itemStack, tooltipContext, list) -> {
+        ItemTooltipCallback.EVENT.register((itemStack, tooltipContext, tooltipType, list) -> {
             ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
             if (!config.isEnable)
                 return;
@@ -111,16 +120,6 @@ public class TooltipEventHandler {
                 }
             }
 
-            // Tooltip - MiningLevel
-            if (config.MiningLevel.isShown(isShiftDown, config.debug)) {
-                if (item instanceof ToolItem) {
-                    int miningLevel = ((ToolItem) item).getMaterial().getMiningLevel();
-                    String string = Text.translatable("tooltip.more_tooltips.MiningLevel", miningLevel).getString();
-                    string = LimitStringLength(string, config.TextMaxLength);
-                    list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold));
-                }
-            }
-
             // Tooltip - MiningSpeed
             if (config.MiningSpeed.isShown(isShiftDown, config.debug)) {
                 if (item instanceof ToolItem) {
@@ -146,10 +145,10 @@ public class TooltipEventHandler {
 
             // Tooltip - Hunger / Saturation
             if (config.Food.isShown(isShiftDown, config.debug)) {
-                if (itemStack.isFood()) {
-                    FoodComponent foodComponent = item.getFoodComponent();
-                    int healVal = foodComponent.getHunger();
-                    float satVal = healVal * (foodComponent.getSaturationModifier()) * 2;
+                FoodComponent foodComponent = itemStack.get(DataComponentTypes.FOOD);
+                if (foodComponent != null) {
+                    int healVal = foodComponent.nutrition();
+                    float satVal = foodComponent.saturation();
                     String string = Text.translatable("tooltip.more_tooltips.hunger", healVal,
                             Formatter.format(satVal)).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
@@ -157,11 +156,12 @@ public class TooltipEventHandler {
                 }
             }
 
-            // Tooltip - NBT Data
-            if (config.NBT.isShown(isShiftDown, config.debug)) {
-                NbtCompound nbtData = itemStack.getNbt();
-                if (nbtData != null) {
-                    String string = Text.translatable("tooltip.more_tooltips.nbtTagData", nbtData.asString())
+            // Tooltip - Component
+            if (config.Components.isShown(isShiftDown, config.debug)) {
+                ComponentChanges components = itemStack.getComponentChanges();
+                if (components != null && !components.isEmpty()) {
+                    NbtElement nbtElement = componentEncode(components, clientInstance.world.getRegistryManager());
+                    String string = Text.translatable("tooltip.more_tooltips.components", nbtElement.toString())
                             .getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
@@ -196,7 +196,7 @@ public class TooltipEventHandler {
 
             // Tooltip - Repair Cost
             if (config.RepairCost.isShown(isShiftDown, config.debug)) {
-                int repairCost = itemStack.getRepairCost();
+                int repairCost = itemStack.getOrDefault(DataComponentTypes.REPAIR_COST, 0);
                 if (repairCost > 0 || itemStack.isDamageable()) {
                     String string = Text.translatable("tooltip.more_tooltips.RepairCost", repairCost).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
@@ -237,28 +237,23 @@ public class TooltipEventHandler {
             
             // Tooltip - Bee Nest / Beehive information
             if (config.BeeNest.isShown(isShiftDown, config.debug)) {
-                if (item == Items.BEE_NEST || item == Items.BEEHIVE) {
-                    NbtCompound nbtData1 = itemStack.getNbt();
-                    if (nbtData1 != null) {
-                        // honey level
-                        // Data type is string (when survival) or int (when creative).
-                        // Also, when pick block in creative, it doesn't exist.
-                        NbtCompound nbtData2 = nbtData1.getCompound("BlockStateTag");
-                        if (nbtData2 != null && nbtData2.contains("honey_level")) {
-                            String string = Text.translatable("tooltip.more_tooltips.HoneyLevel", 
-                                    nbtData2.get("honey_level").asString()).getString();
-                            string = LimitStringLength(string, config.TextMaxLength);
-                            list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
-                        }
-                        // bees num
-                        NbtCompound nbtDate3 = nbtData1.getCompound("BlockEntityTag");
-                        if (nbtDate3 != null) {
-                            String string = Text.translatable("tooltip.more_tooltips.BeeCount",
-                                    nbtDate3.getList("Bees", NbtElement.COMPOUND_TYPE).size()).getString();
-                            string = LimitStringLength(string, config.TextMaxLength);
-                            list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
-                        }
+                // honey level
+                BlockStateComponent blockState = itemStack.get(DataComponentTypes.BLOCK_STATE);
+                if (blockState != null) {
+                    Integer honeyLevel = blockState.getValue(Properties.HONEY_LEVEL);
+                    if (honeyLevel != null) {
+                        String string = Text.translatable("tooltip.more_tooltips.HoneyLevel", honeyLevel).getString();
+                        string = LimitStringLength(string, config.TextMaxLength);
+                        list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
                     }
+                }
+
+                // bees num
+                List<BeehiveBlockEntity.BeeData> bees = itemStack.get(DataComponentTypes.BEES);
+                if (bees != null) {
+                    String string = Text.translatable("tooltip.more_tooltips.BeeCount", bees.size()).getString();
+                    string = LimitStringLength(string, config.TextMaxLength);
+                    list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
                 }
             }
 

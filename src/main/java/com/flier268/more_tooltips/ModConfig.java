@@ -2,6 +2,7 @@ package com.flier268.more_tooltips;
 
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
+import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
 @Config(name = MoreTooltips.MOD_ID)
 public class ModConfig implements ConfigData {
@@ -12,12 +13,15 @@ public class ModConfig implements ConfigData {
     public Options BurnTime = Options.show;
     public Options Durability = Options.show;
     public Options Food = Options.show;
+    public Options Components = Options.onShiftAndDebug;
+    @ConfigEntry.Gui.Excluded
     public Options NBT = Options.onShiftAndDebug;
     public Options ID = Options.onShift;
     public Options MaxStackSize = Options.show;
     public Options TranslationKey = Options.onDebug;
     public Options RepairCost = Options.onShift;
     public Options Enchantability = Options.onShift;
+    @ConfigEntry.Gui.Excluded
     public Options MiningLevel = Options.show;
     public Options MiningSpeed = Options.show;
     public Options LightLevel = Options.show;
