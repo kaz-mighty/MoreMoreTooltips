@@ -6,9 +6,7 @@ import java.util.List;
 
 import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.minecraft.block.ComposterBlock;
-import net.minecraft.block.entity.BeehiveBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
@@ -16,15 +14,12 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.BlockStateComponent;
 import net.minecraft.component.type.FoodComponent;
 import net.minecraft.item.Item;
-import net.minecraft.item.ToolItem;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.state.property.Properties;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -112,25 +107,14 @@ public class TooltipEventHandler {
 
             // Tooltip - Burn Time
             if (config.BurnTime.isShown(isShiftDown, config.debug)) {
-                Integer burnTime = FuelRegistry.INSTANCE.get(item);
-                if (burnTime != null && burnTime > 0) {
+                int burnTime = clientInstance.world.getFuelRegistry().getFuelTicks(itemStack);
+                if (burnTime > 0) {
                     String string = Text.translatable("tooltip.more_tooltips.burnTime", burnTime).getString();
                     string = LimitStringLength(string, config.TextMaxLength);
                     list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
                 }
             }
-
-            // Tooltip - MiningSpeed
-            if (config.MiningSpeed.isShown(isShiftDown, config.debug)) {
-                if (item instanceof ToolItem) {
-                    float miningSpeed = ((ToolItem) item).getMaterial().getMiningSpeedMultiplier();
-                    String string = Text.translatable("tooltip.more_tooltips.MiningSpeed",
-                            Formatter.format(miningSpeed)).getString();
-                    string = LimitStringLength(string, config.TextMaxLength);
-                    list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold));
-                }
-            }
-
+            
             // Tooltip - Durability
             if (config.Durability.isShown(isShiftDown, config.debug)) {
                 int maxDamage = itemStack.getMaxDamage();
@@ -189,7 +173,7 @@ public class TooltipEventHandler {
             // Tooltip - Translation Key
             if (config.TranslationKey.isShown(isShiftDown, config.debug)) {
                 String string = Text.translatable("tooltip.more_tooltips.translationKey",
-                        itemStack.getTranslationKey()).getString();
+                        item.getTranslationKey()).getString();
                 string = LimitStringLength(string, config.TextMaxLength);
                 list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
             }
@@ -206,10 +190,13 @@ public class TooltipEventHandler {
             // Tooltip - Enchantability
             if (config.Enchantability.isShown(isShiftDown, config.debug)) {
                 if (itemStack.isEnchantable()) {
-                    String string = Text.translatable("tooltip.more_tooltips.Enchantability",
-                            item.getEnchantability()).getString();
-                    string = LimitStringLength(string, config.TextMaxLength);
-                    list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
+                    var enchantable = itemStack.get(DataComponentTypes.ENCHANTABLE);
+                    if (enchantable != null) {
+                        String string = Text.translatable("tooltip.more_tooltips.Enchantability",
+                                enchantable.value()).getString();
+                        string = LimitStringLength(string, config.TextMaxLength);
+                        list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
+                    }
                 }
             }
 
@@ -235,28 +222,6 @@ public class TooltipEventHandler {
                 }
             }
             
-            // Tooltip - Bee Nest / Beehive information
-            if (config.BeeNest.isShown(isShiftDown, config.debug)) {
-                // honey level
-                BlockStateComponent blockState = itemStack.get(DataComponentTypes.BLOCK_STATE);
-                if (blockState != null) {
-                    Integer honeyLevel = blockState.getValue(Properties.HONEY_LEVEL);
-                    if (honeyLevel != null) {
-                        String string = Text.translatable("tooltip.more_tooltips.HoneyLevel", honeyLevel).getString();
-                        string = LimitStringLength(string, config.TextMaxLength);
-                        list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
-                    }
-                }
-
-                // bees num
-                List<BeehiveBlockEntity.BeeData> bees = itemStack.get(DataComponentTypes.BEES);
-                if (bees != null) {
-                    String string = Text.translatable("tooltip.more_tooltips.BeeCount", bees.size()).getString();
-                    string = LimitStringLength(string, config.TextMaxLength);
-                    list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, DARK_GRAY));
-                }
-            }
-
             if (isShiftDown && config.debug) {
                 String string = Text.literal("Debugging").getString();
                 list.addAll(splitToolTip(clientInstance.textRenderer, string, threshold, AQUA));
